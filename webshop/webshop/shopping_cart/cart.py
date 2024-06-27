@@ -8,6 +8,10 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.contacts.doctype.contact.contact import get_contact_name
 from frappe.utils import cint, cstr, flt, get_fullname
 from frappe.utils.nestedset import get_root_of
+#BDivecha
+from frappe.utils import comma_and
+import googlemaps
+import math
 
 from erpnext.accounts.utils import get_account_name
 from webshop.webshop.doctype.webshop_settings.webshop_settings import (
@@ -53,6 +57,11 @@ def get_cart_quotation(doc=None):
 		"cart_settings": frappe.get_cached_doc("Webshop Settings"),
 	}
 
+#BDivecha
+@frappe.whitelist()
+def get_shipping_rule():
+	quotation = _get_cart_quotation()
+	return quotation.shipping_rule
 
 @frappe.whitelist()
 def get_shipping_addresses(party=None):
@@ -171,6 +180,12 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 		warehouse = frappe.get_cached_value(
 			"Website Item", {"item_code": item_code}, "website_warehouse"
 		)
+
+		#BDivecha
+		different_warehouse = [i for i in quotation.get("items", {"item_code": ["!=", item_code]}) if i.warehouse != warehouse]
+		if len(different_warehouse) > 0:
+			frappe.throw("Sorry!, You cannot add products from multiple warehouses (locations) in same order. Please go to cart in case you want remove added products")
+			return
 
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -680,17 +695,63 @@ def get_address_docs(
 
 @frappe.whitelist()
 def apply_shipping_rule(shipping_rule):
-	quotation = _get_cart_quotation()
+	try:
+		quotation = _get_cart_quotation()
 
-	quotation.shipping_rule = shipping_rule
+		#BDivecha
+		#quotation.shipping_rule = shipping_rule
 
-	apply_cart_settings(quotation=quotation)
+		quotation.custom_distance = get_distance(shipping_rule, quotation)
 
-	quotation.flags.ignore_permissions = True
-	quotation.save()
+		if quotation.custom_distance is None:
+				return get_cart_quotation(quotation)
+			
+		quotation.shipping_rule = shipping_rule
 
-	return get_cart_quotation(quotation)
+		apply_cart_settings(quotation=quotation)
 
+		quotation.flags.ignore_permissions = True
+		quotation.save()
+
+		return get_cart_quotation(quotation)
+	except:
+		frappe.log_error(frappe.get_traceback(), 'Error applying shipping rule')
+
+#BDivecha
+def get_distance(shipping_rule, quotation):
+	check = frappe.db.get_value("Shipping Rule", shipping_rule, "custom_location_based")
+	if "pick" not in shipping_rule.lower() and check:
+		if len(quotation.get('items')) > 0:
+			first_item = quotation.get('items')[0].item_code
+		else:
+			first_item = None
+			
+		warehouse = frappe.get_cached_value("Website Item", {"item_code": first_item}, "website_warehouse")
+		warehouse_address = frappe.get_cached_value("Warehouse", warehouse, ['address_line_1', 'address_line_2', 'city', 'state'])
+		warehouse_address = comma_and(warehouse_address).replace('and',',')
+		
+		customer_address = frappe.get_cached_value("Address", quotation.shipping_address_name, ['address_line1', 'address_line2', 'city', 'state', 'country'])
+		customer_address = comma_and(customer_address).replace('and',',')
+
+		#return 100
+		return get_actual_distance(warehouse_address, customer_address)
+
+	else:
+		return 0
+	
+#BDivecha
+def get_actual_distance(from_value, to_value):
+	try:
+		nubia_settings = frappe.get_cached_doc("Nubia Settings")
+		k = nubia_settings.get_password('google_api')
+		
+		gmaps = googlemaps.Client(key=k)
+ 
+		my_dist = gmaps.distance_matrix(from_value, to_value, region='tz')['rows'][0]['elements'][0]
+		return math.ceil((my_dist['distance']['value'])/1000)
+	except:
+		#frappe.log_error(frappe.get_traceback(), 'Error calculating distance')
+		frappe.throw('Selected Shipping method not available - Error calculating distance, please contact support or retry!')
 
 def _apply_shipping_rule(party=None, quotation=None, cart_settings=None):
 	if not quotation.shipping_rule:
