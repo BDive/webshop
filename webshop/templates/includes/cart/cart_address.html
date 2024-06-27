@@ -13,15 +13,22 @@
 	</div>
 
 	<hr>
-	{% for address in shipping_addresses %}
-	{% if doc.shipping_address_name == address.name %}
-	<div class="row no-gutters" data-fieldname="shipping_address_name">
-		<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="shipping" data-active>
-			{% include "templates/includes/cart/address_card.html" %}
-		</div>
-	</div>
-	{% endif %}
-	{% endfor %}
+	<!-- BDivecha -->
+	<select class="shipping-address-select" name="shipping-address-select">
+		<option value= "" selected disabled hidden>Select Address</option>
+		{% for address in shipping_addresses %}
+			{% if doc.shipping_address_name == address.name %}
+			<option value="{{ address.name }}" selected>{{ address.name }}</option>
+			<!-- <div class="row no-gutters" data-fieldname="shipping_address_name">
+				<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="shipping" data-active>
+					{% include "templates/includes/cart/address_card.html" %}
+				</div>
+			</div> -->
+			{% else %}
+			<option value="{{ address.name }}">{{ address.name }}</option>
+			{% endif %}
+		{% endfor %}
+	</select>
 </div>
 
 <!-- Billing Address -->
@@ -42,15 +49,22 @@
 	</div>
 
 	<hr>
-	{% for address in billing_addresses %}
-		{% if doc.customer_address == address.name %}
-		<div class="row no-gutters" data-fieldname="customer_address">
-			<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="billing" data-active>
-					{% include "templates/includes/cart/address_card.html" %}
-				</div>
-		</div>
-		{% endif %}
-	{% endfor %}
+	<!--BDivecha-->
+	<select class="billing-address-select" name="billing-address-select">
+		<option value= "" selected disabled hidden>Select Address</option>
+		{% for address in billing_addresses %}
+			{% if doc.customer_address == address.name %}
+			<option value="{{ address.name }}" selected>{{ address.name }}</option>
+			<!-- <div class="row no-gutters" data-fieldname="customer_address">
+				<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="billing" data-active>
+						{% include "templates/includes/cart/address_card.html" %}
+					</div>
+			</div> -->
+			{% else %}
+			<option value="{{ address.name }}">{{ address.name }}</option>
+			{% endif %}
+		{% endfor %}
+	</select>
 </div>
 
 
@@ -68,95 +82,110 @@ frappe.ready(() => {
 		toggle_billing_address_section(!$check.is(':checked'));
 	});
 
-	$('.btn-new-address').click(() => {
-		const d = new frappe.ui.Dialog({
-			title: __('New Address'),
-			fields: [
-				{
-					label: __('Address Title'),
-					fieldname: 'address_title',
-					fieldtype: 'Data',
-					reqd: 1
+	//BDivecha
+	$(".shipping-address-select").on("change", function() {
+			shopping_cart.freeze();
+			frappe.call({
+				method: "webshop.webshop.shopping_cart.cart.update_cart_address",
+				args: {
+					address_type: 'shipping',
+					address_name: $(this).val()
 				},
-				{
-					label: __('Address Line 1'),
-					fieldname: 'address_line1',
-					fieldtype: 'Data',
-					reqd: 1
-				},
-				{
-					label: __('Address Line 2'),
-					fieldname: 'address_line2',
-					fieldtype: 'Data'
-				},
-				{
-					label: __('City/Town'),
-					fieldname: 'city',
-					fieldtype: 'Data',
-					reqd: 1
-				},
-				{
-					label: __('State'),
-					fieldname: 'state',
-					fieldtype: 'Data'
-				},
-				{
-					label: __('Country'),
-					fieldname: 'country',
-					fieldtype: 'Link',
-					options: 'Country',
-					only_select: true,
-					reqd: 1
-				},
-				{
-					fieldname: "column_break0",
-					fieldtype: "Column Break",
-					width: "50%"
-				},
-				{
-					label: __('Address Type'),
-					fieldname: 'address_type',
-					fieldtype: 'Select',
-					options: [
-						'Billing',
-						'Shipping'
-					],
-					reqd: 1
-				},
-				{
-					label: __('Postal Code'),
-					fieldname: 'pincode',
-					fieldtype: 'Data'
-				},
-				{
-					fieldname: "phone",
-					fieldtype: "Data",
-					label: "Phone",
-					reqd: 1
-				},
-			],
-			primary_action_label: __('Save'),
-			primary_action: (values) => {
-				frappe.call('webshop.webshop.shopping_cart.cart.add_new_address', { doc: values })
-					.then(r => {
-						frappe.call({
-							method: "webshop.webshop.shopping_cart.cart.update_cart_address",
-							args: {
-								address_type: r.message.address_type,
-								address_name: r.message.name
-							},
-							callback: function (r) {
-								d.hide();
-								window.location.reload();
-							}
-						});
-					});
-
-			}
-		})
-
-		d.show();
+				callback: function (r) {
+					window.location.reload();
+				}
+			});
 	});
+
+	// $('.btn-new-address').click(() => {
+	// 	const d = new frappe.ui.Dialog({
+	// 		title: __('New Address'),
+	// 		fields: [
+	// 			{
+	// 				label: __('Address Title'),
+	// 				fieldname: 'address_title',
+	// 				fieldtype: 'Data',
+	// 				reqd: 1
+	// 			},
+	// 			{
+	// 				label: __('Address Line 1'),
+	// 				fieldname: 'address_line1',
+	// 				fieldtype: 'Data',
+	// 				reqd: 1
+	// 			},
+	// 			{
+	// 				label: __('Address Line 2'),
+	// 				fieldname: 'address_line2',
+	// 				fieldtype: 'Data'
+	// 			},
+	// 			{
+	// 				label: __('City/Town'),
+	// 				fieldname: 'city',
+	// 				fieldtype: 'Data',
+	// 				reqd: 1
+	// 			},
+	// 			{
+	// 				label: __('State'),
+	// 				fieldname: 'state',
+	// 				fieldtype: 'Data'
+	// 			},
+	// 			{
+	// 				label: __('Country'),
+	// 				fieldname: 'country',
+	// 				fieldtype: 'Link',
+	// 				options: 'Country',
+	// 				only_select: true,
+	// 				reqd: 1
+	// 			},
+	// 			{
+	// 				fieldname: "column_break0",
+	// 				fieldtype: "Column Break",
+	// 				width: "50%"
+	// 			},
+	// 			{
+	// 				label: __('Address Type'),
+	// 				fieldname: 'address_type',
+	// 				fieldtype: 'Select',
+	// 				options: [
+	// 					'Billing',
+	// 					'Shipping'
+	// 				],
+	// 				reqd: 1
+	// 			},
+	// 			{
+	// 				label: __('Postal Code'),
+	// 				fieldname: 'pincode',
+	// 				fieldtype: 'Data'
+	// 			},
+	// 			{
+	// 				fieldname: "phone",
+	// 				fieldtype: "Data",
+	// 				label: "Phone",
+	// 				reqd: 1
+	// 			},
+	// 		],
+	// 		primary_action_label: __('Save'),
+	// 		primary_action: (values) => {
+	// 			frappe.call('webshop.webshop.shopping_cart.cart.add_new_address', { doc: values })
+	// 				.then(r => {
+	// 					frappe.call({
+	// 						method: "webshop.webshop.shopping_cart.cart.update_cart_address",
+	// 						args: {
+	// 							address_type: r.message.address_type,
+	// 							address_name: r.message.name
+	// 						},
+	// 						callback: function (r) {
+	// 							d.hide();
+	// 							window.location.reload();
+	// 						}
+	// 					});
+	// 				});
+
+	// 		}
+	// 	})
+
+	// 	d.show();
+	// });
 
 	function setup_state() {
 		const shipping_address = $('[data-section="shipping-address"]')
