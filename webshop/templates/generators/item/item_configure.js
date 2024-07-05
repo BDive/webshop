@@ -29,7 +29,9 @@ class ItemConfigure {
 		});
 
 		this.dialog = new frappe.ui.Dialog({
-			title: __('Select Variant for {0}', [this.item_name]),
+			//BDivecha
+			//title: __('Select Variant for {0}', [this.item_name]),
+			title: __('Select Region for {0}', [this.item_name]),
 			fields,
 			on_hide: () => {
 				set_continue_configuration();
@@ -317,8 +319,100 @@ function set_continue_configuration() {
 	if (localStorage.getItem(`configure:${itemCode}`)) {
 		$btn_configure.text(__('Continue Selection'));
 	} else {
-		$btn_configure.text(__('Select Variant'));
+		//BDivecha
+		//$btn_configure.text(__('Select Variant'));
+		$btn_configure.text(__('Select Region'));
 	}
+}
+
+//BDivecha
+function show_regiondata(item_code){
+	$('.btn-configure').prop('disabled', true);
+	$('#regiondata').addClass("spinner-border text-primary");
+	frappe.call({
+		method: 'webshop.webshop.variant_selector.utils.get_attributes_and_values',
+		args: {
+			item_code: item_code
+		},
+		// freeze the screen until the request is completed
+		freeze: true,
+		callback: (r) => {
+			// on success
+			
+			regions = r.message[0].values;
+
+			if(regions.length <= 0){
+				$('#regiondata').removeClass("spinner-border text-primary");
+				$('#regiondata').text('Sorry, Not available at the moment');
+				return;
+			}
+
+			let variant_count = 0;
+			let final = `
+				<br />
+				<div class="table-responsive">          
+					<table class="table">
+					<thead>
+					<tr>
+					<th>Region</th>
+					<th>Quantity</th>
+					<th>Price</th>
+					</tr>
+					</thead>
+					<tbody>
+			`
+
+			regions.forEach(function(e) {
+				
+				frappe.call({
+					method: 'webshop.webshop.variant_selector.utils.get_next_attribute_and_values',
+					args: {
+						item_code: item_code,
+						selected_attributes: { Region: e }
+					},
+					// freeze the screen until the request is completed
+					freeze: true,
+					callback: (r) => {
+						// on success
+						//console.log(r.message);
+						let item = r.message;
+
+						if(item.available_qty > 0 ){
+							variant_count += 1;
+							final += `
+										<tr>
+											<td>${e}</td>
+											<td>${item.available_qty}</td>
+											<td>${item.product_info.price.formatted_price_sales_uom}/${item.product_info.uom}</td>
+										</tr>
+							`
+
+							$('.btn-configure').prop('disabled', false);
+							$('#regiondata').removeClass("spinner-border text-primary");
+							$('#regiondata').html(final);
+						}
+						
+						if(variant_count <= 0){
+							$('#regiondata').removeClass("spinner-border text-primary");
+							$('#regiondata').text('Sorry, Not available at the moment!');	
+						}
+						
+					},
+					error: (r) => {
+						// on error
+						$('#regiondata').removeClass("spinner-border text-primary");
+						$('#regiondata').text('Error fetching data, please contact support!')
+					}
+				})
+
+			});
+		},
+		error: (r) => {
+			// on error
+			$('#regiondata').removeClass("spinner-border text-primary");
+			$('#regiondata').text('Error fetching data, please contact support!')
+		}
+	})
 }
 
 frappe.ready(() => {
@@ -327,6 +421,9 @@ frappe.ready(() => {
 	const { itemCode, itemName } = $btn_configure.data();
 
 	set_continue_configuration();
+
+	//BDivecha
+	show_regiondata(itemCode);
 
 	$btn_configure.on('click', () => {
 		$btn_configure.prop('disabled', true);

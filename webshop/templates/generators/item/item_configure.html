@@ -7,12 +7,16 @@
 		data-item-code="{{ doc.item_code }}"
 		data-item-name="{{ doc.web_item_name }}"
 	>
-		{{ _('Select Variant') }}
+		<!--BDivecha-->
+		<!--{{ _('Select Variant') }}-->
+		{{ _('Select Region') }}
 	</button>
 	{% endif %}
 	{% if cart_settings.show_contact_us_button %}
 		{% include "templates/generators/item/item_inquiry.html" %}
 	{% endif %}
+	<!--BDivecha-->
+	<div id="regiondata"></div>
 </div>
 <script>
 {% include "templates/generators/item/item_configure.js" %}

@@ -176,8 +176,10 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			product_id = list(filtered_items)[0]
 
 	if product_id:
-		warehouse = frappe.get_cached_value(
-			"Website Item", {"item_code": product_id}, "website_warehouse"
+		warehouse, product_info["uom"] = frappe.get_cached_value(
+			#BDivecha
+			#"Website Item", {"item_code": product_id}, "website_warehouse"
+			"Website Item", {"item_code": product_id.split('-')[0]}, ["website_warehouse", "stock_uom"]
 		)
 
 	available_qty = 0.0
