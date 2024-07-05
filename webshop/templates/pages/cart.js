@@ -11,14 +11,6 @@ $.extend(shopping_cart, {
 			title + '</h4><p class="text-muted">' + text + '</p></div>');
 	},
 
-	//BDivecha
-	bind_change_shipping_method: function(){
-		$(".shipping-method-select").on("change", function() {
-			shopping_cart.freeze();
-			shopping_cart.apply_shipping_rule($(this).val(), this);
-		});
-	},
-
 	bind_events: function() {
 		shopping_cart.bind_place_order();
 		shopping_cart.bind_request_quotation();
@@ -28,6 +20,14 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_coupon_code();
 		//BDivecha
 		shopping_cart.bind_change_shipping_method();
+	},
+
+	//BDivecha
+	bind_change_shipping_method: function(){
+		$(".shipping-method-select").on("change", function() {
+			shopping_cart.freeze();
+			shopping_cart.apply_shipping_rule($(this).val(), this);
+		});
 	},
 
 	bind_place_order: function() {
