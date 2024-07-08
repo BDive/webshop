@@ -53,6 +53,11 @@ def get_cart_quotation(doc=None):
 		"cart_settings": frappe.get_cached_doc("Webshop Settings"),
 	}
 
+#BDivecha
+@frappe.whitelist()
+def get_shipping_rule():
+	quotation = _get_cart_quotation()
+	return quotation.shipping_rule
 
 @frappe.whitelist()
 def get_shipping_addresses(party=None):
@@ -171,6 +176,13 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 		warehouse = frappe.get_cached_value(
 			"Website Item", {"item_code": item_code}, "website_warehouse"
 		)
+
+		#BDivecha
+		#different_warehouse = [i for i in quotation.get("items", {"item_code": ["!=", item_code]}) if i.warehouse != warehouse]
+		different_warehouse = [i for i in quotation.get("items", {"item_code": ["!=", item_code]}) if i.item_code.split('-')[1] != item_code.split('-')[1]]
+		if len(different_warehouse) > 0:
+			frappe.throw("Sorry!, You cannot add products from multiple warehouses (regions) in same order. Please go to cart in case you want remove added products")
+			return
 
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -726,18 +738,44 @@ def get_shipping_rules(quotation=None, cart_settings=None):
 			"Address", quotation.shipping_address_name, "country"
 		)
 		if country:
-			sr_country = frappe.qb.DocType("Shipping Rule Country")
-			sr = frappe.qb.DocType("Shipping Rule")
-			query = (
-				frappe.qb.from_(sr_country)
-				.join(sr)
-				.on(sr.name == sr_country.parent)
-				.select(sr.name)
-				.distinct()
-				.where((sr_country.country == country) & (sr.disabled != 1))
-			)
-			result = query.run(as_list=True)
-			shipping_rules = [x[0] for x in result]
+			#BDivecha
+			# sr_country = frappe.qb.DocType("Shipping Rule Country")
+			# sr = frappe.qb.DocType("Shipping Rule")
+			# query = (
+			# 	frappe.qb.from_(sr_country)
+			# 	.join(sr)
+			# 	.on(sr.name == sr_country.parent)
+			# 	.select(sr.name)
+			# 	.distinct()
+			# 	.where((sr_country.country == country) & (sr.disabled != 1))
+			# )
+			# result = query.run(as_list=True)
+			# shipping_rules = [x[0] for x in result]
+
+			if len(quotation.get('items')) > 0:
+				first_item = quotation.get('items')[0].item_code
+			else:
+				first_item = 'None-None'
+			
+			values = {
+				'qty': quotation.total_net_weight,
+				'from_address': first_item.split('-')[1],
+				'to_address': frappe.db.get_value("Address", quotation.shipping_address_name, "city"),
+				'country': country
+
+			}
+
+			result = frappe.db.sql("""
+				select sr.name, IFNULL(CASE sr.custom_location_based WHEN 1 THEN cond.shipping_amount ELSE sr.shipping_amount END, -1) as `shipping_amount`
+				from `tabShipping Rule` sr
+				inner join `tabShipping Rule Country` sr_country on sr.name = sr_country.parent 
+				left join `tabShipping Rule Condition` cond on  sr.name = cond.parent and cond.parenttype = 'Shipping Rule' 
+				and custom_from_region  = %(from_address)s and custom_to_region  = %(to_address)s
+				where sr_country.country = %(country)s and sr.disabled !=1
+				order by sr.name
+			""", values=values, as_list=1)
+			
+			shipping_rules = [x[0] for x in result if x[1] >= 0]
 
 	return shipping_rules
 

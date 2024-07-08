@@ -66,12 +66,16 @@ class ItemVariantsCacheManager:
 		# Get Variants and tehir Attributes that are not disabled
 		iva = frappe.qb.DocType("Item Variant Attribute")
 		item = frappe.qb.DocType("Item")
+		#BDivecha
+		bin = frappe.qb.DocType("Bin")
 		query = (
 			frappe.qb.from_(iva)
 			.join(item)
 			.on(item.name == iva.parent)
+			.inner_join(bin)
+			.on(bin.item_code == iva.parent)
 			.select(iva.parent, iva.attribute, iva.attribute_value)
-			.where((iva.variant_of == parent_item_code) & (item.disabled == 0))
+			.where((iva.variant_of == parent_item_code) & (item.disabled == 0) & (bin.actual_qty > 0))
 			.orderby(iva.name)
 		)
 		item_variants_data = query.run()

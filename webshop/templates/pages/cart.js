@@ -18,6 +18,16 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_remove_cart_item();
 		shopping_cart.bind_change_notes();
 		shopping_cart.bind_coupon_code();
+		//BDivecha
+		shopping_cart.bind_change_shipping_method();
+	},
+
+	//BDivecha
+	bind_change_shipping_method: function(){
+		$(".shipping-method-select").on("change", function() {
+			shopping_cart.freeze();
+			shopping_cart.apply_shipping_rule($(this).val(), this);
+		});
 	},
 
 	bind_place_order: function() {
@@ -131,8 +141,13 @@ $.extend(shopping_cart, {
 			method: "webshop.webshop.shopping_cart.cart.apply_shipping_rule",
 			args: { shipping_rule: rule },
 			callback: function(r) {
-				if(!r.exc) {
-					shopping_cart.render(r.message);
+				//BDivecha
+				// if(!r.exc) {
+				// 	shopping_cart.render(r.message);
+				// }
+				if (!r.exc){
+					shopping_cart.unfreeze();
+					r.message ? location.reload() : setTimeout(() => location.reload(), 3000);
 				}
 			}
 		});
@@ -219,6 +234,17 @@ $.extend(shopping_cart, {
 frappe.ready(function() {
 	if (window.location.pathname === "/cart") {
 		$(".cart-icon").hide();
+		//BDivecha
+		frappe.call({
+			type: "POST",
+			method: "webshop.webshop.shopping_cart.cart.get_shipping_rule",
+			args: { },
+			callback: function(r) {
+				if (r && r.message){
+					$(".shipping-method-select").val(r.message);
+				}
+			}
+		});
 	}
 	shopping_cart.parent = $(".cart-container");
 	shopping_cart.bind_events();
