@@ -329,6 +329,13 @@ function set_continue_configuration() {
 function show_regiondata(item_code){
 	$('.btn-configure').prop('disabled', true);
 	$('#regiondata').addClass("spinner-border text-primary");
+
+	if(frappe.session.user == "Guest"){
+		$('#regiondata').removeClass("spinner-border text-primary");
+		$('#regiondata').html('<br />Please <a href="/login">login</a> to view price details');
+		return;
+	}
+	
 	frappe.call({
 		method: 'webshop.webshop.variant_selector.utils.get_attributes_and_values',
 		args: {
