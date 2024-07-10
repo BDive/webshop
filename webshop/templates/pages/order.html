@@ -34,7 +34,8 @@
 				</a>
 			</ul>
 		</div>
-		<div class="form-column col-sm-6">
+		<!--BDivecha-->
+		<!-- <div class="form-column col-sm-6">
 			<div class="page-header-actions-block" data-html-block="header-actions">
 				<p>
 					{% if doc.doctype != "Sales Invoice" or doc.outstanding_amount > 0 %}
@@ -45,7 +46,8 @@
 					{% endif %}
 				</p>
 			</div>
-		</div>
+		</div> -->
+		<!--BDivecha-->
 	</div>
 {% endblock %}
 
@@ -132,6 +134,20 @@
 
 	{% if enabled_checkout and ((doc.doctype=="Sales Order" and doc.per_billed <= 0)
 		or (doc.doctype=="Sales Invoice" and doc.outstanding_amount> 0)) %}
+		<!--BDivecha-->
+		<div class="table-responsive">
+			<table class="table-condensed table-borderless">
+			<tr><th>Please make payments to the following Account</th></tr>
+			<tr><td><hr /></td></tr>
+			<tr><td>Name of Bank: NMB Bank</td></tr>
+			<tr><td>Name of Company: Nubia</td></tr>
+			<tr><td>Bank Branch: Ohio</td></tr>
+			<tr><td>Account Number: XXXXXX - TZS</td></tr>
+			<tr><td>Swift Code: NMIBTZTZ</td></tr>
+			<tr><td><hr /></td></tr>
+			<tr><td><a class="btn btn-info" href="mailto:sales@nubia.co.tz?subject=POP For {{doc.customer_name}} - {{doc.name}}">Email Proof Payment</a></td></tr>
+			</table>
+		</div>
 		<div class="panel panel-default">
 			<div class="panel-collapse">
 				<div class="panel-body text-muted small">
