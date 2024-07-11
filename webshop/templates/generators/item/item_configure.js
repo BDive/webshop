@@ -347,7 +347,7 @@ function show_regiondata(item_code){
 			// on success
 			
 			regions = r.message[0].values;
-			console.log(regions);
+			//console.log(regions);
 
 			if(regions.length <= 0){
 				$('#regiondata').removeClass("spinner-border text-primary");
@@ -382,7 +382,7 @@ function show_regiondata(item_code){
 					freeze: true,
 					callback: (r) => {
 						// on success
-						//console.log(r.message);
+						console.log(r.message);
 						let item = r.message;
 
 						if(item.available_qty > 0 ){
