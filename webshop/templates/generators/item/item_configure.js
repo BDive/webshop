@@ -390,7 +390,7 @@ function show_regiondata(item_code){
 							final += `
 										<tr>
 											<td>${e}</td>
-											<td>${item.available_qty}</td>
+											<td>${item.available_qty} ${item.product_info.uom}</td>
 											<td>${item.product_info.price.formatted_price_sales_uom}/${item.product_info.uom}</td>
 										</tr>
 							`
