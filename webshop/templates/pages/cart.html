@@ -25,7 +25,8 @@
 					<thead>
 						<tr>
 							<th class="item-column">{{ _('Item') }}</th>
-							<th width="20%">{{ _('Quantity') }}</th>
+							<!--BDivecha-->
+							<th width="20%">{{ _('Quantity') }} ({{doc.items[0].uom}})</th>
 							{% if cart_settings.enable_checkout or cart_settings.show_price_in_quotation %}
 								<th width="20" class="text-right column-sm-view">{{ _('Subtotal') }}</th>
 							{% endif %}

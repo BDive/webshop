@@ -32,7 +32,17 @@ $.extend(shopping_cart, {
 
 	bind_place_order: function() {
 		$(".btn-place-order").on("click", function() {
-			shopping_cart.place_order(this);
+			//BDivecha
+			//let t = shopping_cart.parent[0].innerHTML;
+			frappe.confirm("Are you sure you want to proceed?",
+				() => {
+					// action to perform if Yes is selected
+					shopping_cart.place_order(this);
+				}, () => {
+					// action to perform if No is selected
+					
+				}
+			)
 		});
 	},
 

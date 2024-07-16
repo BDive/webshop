@@ -1,10 +1,6 @@
 {% from "webshop/templates/includes/macros.html" import product_image %}
-
+<!--BDivecha-->
 {% macro item_subtotal(item) %}
-	<div>
-		{{ item.get_formatted('amount') }}
-	</div>
-
 	{% if item.is_free_item %}
 		<div class="text-success mt-4">
 			<span class="free-tag">
@@ -16,6 +12,9 @@
 			{{ _('Rate:') }} {{ item.get_formatted('rate') }}
 		</span>
 	{% endif %}
+	<div>
+		{{ item.get_formatted('amount') }}
+	</div>
 {% endmacro %}
 
 {% for d in doc.items %}
