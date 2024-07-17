@@ -69,6 +69,7 @@ frappe.ready(() => {
 	});
 
 	$('.btn-new-address').click(() => {
+		//BDivecha
 		const d = new frappe.ui.Dialog({
 			title: __('New Address'),
 			fields: [
@@ -89,10 +90,49 @@ frappe.ready(() => {
 					fieldname: 'address_line2',
 					fieldtype: 'Data'
 				},
+				// {
+				// 	label: __('City/Town'),
+				// 	fieldname: 'city',
+				// 	fieldtype: 'Data',
+				// 	reqd: 1
+				// },
 				{
 					label: __('City/Town'),
 					fieldname: 'city',
-					fieldtype: 'Data',
+					fieldtype: 'Select',
+					options: [
+						'Arusha',
+						'Dar Es Salaam',
+						'Dodoma',
+						'Geita',
+						'Iringa',
+						'Bukoba',
+						'Mpanda',
+						'Kigoma',
+						'Moshi',
+						'Lindi',
+						'Babati',
+						'Musoma',
+						'Mbeya',
+						'Zanzibar City',
+						'Morogoro',
+						'Mtwara',
+						'Mwanza',
+						'Njombe',
+						'Wete',
+						'Chake Chake',
+						'Kibaha',
+						'Sumbawanga',
+						'Songea',
+						'Shinyanga',
+						'Bariadi',
+						'Singida',
+						'Vwawa',
+						'Tabora',
+						'Tanga',
+						'Zanzibar North',
+						'Zanzibar South'
+					],
 					reqd: 1
 				},
 				{
@@ -100,11 +140,19 @@ frappe.ready(() => {
 					fieldname: 'state',
 					fieldtype: 'Data'
 				},
+				// {
+				// 	label: __('Country'),
+				// 	fieldname: 'country',
+				// 	fieldtype: 'Link',
+				// 	options: 'Country',
+				// 	only_select: true,
+				// 	reqd: 1
+				// },
 				{
 					label: __('Country'),
 					fieldname: 'country',
-					fieldtype: 'Link',
-					options: 'Country',
+					fieldtype: 'Select',
+					options: 'Tanzania',
 					only_select: true,
 					reqd: 1
 				},
