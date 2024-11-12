@@ -15,6 +15,7 @@
   "hide_variants",
   "enable_variants",
   "show_price",
+  "login_required_to_view_products",
   "column_break_9",
   "show_stock_availability",
   "show_quantity_in_website",
@@ -366,12 +367,18 @@
    "fieldtype": "Check",
    "label": "Enable Redisearch",
    "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "default": "0",
+   "fieldname": "login_required_to_view_products",
+   "fieldtype": "Check",
+   "label": "Login Required to View Products"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-01 18:35:56.106756",
+ "modified": "2024-11-05 13:31:46.657592",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Webshop Settings",
